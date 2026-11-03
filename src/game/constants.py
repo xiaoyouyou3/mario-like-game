@@ -1,0 +1,29 @@
+"""物理・寸法・得点の定数（単位をコメントする）。"""
+
+FIXED_DT: float = 1 / 60  # s (REQ-101)
+SCREEN_W: int = 256  # px (REQ-102)
+SCREEN_H: int = 240  # px (REQ-102)
+TILE_SIZE: int = 16  # px
+STAGE_W_TILES: int = 200  # tiles (DES-004)
+STAGE_H_TILES: int = 15  # tiles (DES-004)
+GRAVITY: float = 900.0  # px/s^2 (初期値案)
+FALL_MAX_SPEED: float = 240.0  # px/s (REQ-007)
+WALK_MAX_SPEED: float = 90.0  # px/s (REQ-001)
+RUN_MAX_SPEED: float = 150.0  # px/s (REQ-002)
+ACCEL: float = 720.0  # px/s^2 (初期値案)
+GROUND_DECEL: float = 900.0  # px/s^2 (初期値案、REQ-003)
+AIR_DECEL: float = 360.0  # px/s^2 (初期値案)
+JUMP_SPEED: float = 345.0  # px/s (REQ-006)
+PLAYER_W: int = 12  # px
+PLAYER_H: int = 16  # px
+ENEMY_W: int = 16  # px (初期値案)
+ENEMY_H: int = 16  # px (初期値案)
+ENEMY_WALK_SPEED: float = 30.0  # px/s (REQ-012, REQ-018)
+SHELL_SLIDE_SPEED: float = 200.0  # px/s (REQ-020)
+STOMP_BOUNCE_SPEED: float = 200.0  # px/s (初期値案)
+SHELL_GRACE_FRAMES: int = 12  # フレーム (REQ-049)
+STOMP_ZONE_RATIO: float = 0.5  # 比 (敵の上半分)
+CAMERA_FOLLOW_X: float = 128.0  # px (REQ-039)
+PLAYER_START_OFFSET_X: int = 2  # px (タイル中央に置く: (16 - 12) / 2)
+INITIAL_LIVES: int = 3  # 機 (REQ-029)
+COIN_SCORE: int = 100  # 点 (REQ-028)

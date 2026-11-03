@@ -4,8 +4,8 @@
 
 | 項目 | 値 |
 |---|---|
-| 現在の工程 | 5. 完了確認（完了。残りは Git の初期化・プッシュと、人間による手動確認 MC-001〜012） |
-| 状態 | 全30グループ Green・レビュー APPROVE。render/main/stage1/素材/pygbag ビルドは作成済み。追加テストも APPROVE。残り: Git 初期化・リモート作成・プッシュ、人間による手動確認 |
+| 現在の工程 | 5. 完了確認（完了）。Git はローカルにコミット済み。GitHub へのプッシュは権限拒否のため未実施 |
+| 状態 | 全30グループ Green・レビュー APPROVE。render/main/stage1/素材/pygbag ビルドは作成済み。追加テストも APPROVE。残り: GitHub リポジトリ作成とプッシュ（人間の許可待ち）、人間による手動確認 MC-001〜012 |
 | 次のアクション | stage1.txt → 素材とASSETS.md → renderer.draw → main.py → 工程5（完了確認）→ git |
 
 ## 承認ログ

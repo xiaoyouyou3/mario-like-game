@@ -4,9 +4,9 @@
 
 | 項目 | 値 |
 |---|---|
-| 現在の工程 | 5. 完了確認（完了）。Git はローカルにコミット済み。GitHub へのプッシュは権限拒否のため未実施 |
-| 状態 | 全30グループ Green・レビュー APPROVE。render/main/stage1/素材/pygbag ビルドは作成済み。追加テストも APPROVE。残り: GitHub リポジトリ作成とプッシュ（人間の許可待ち）、人間による手動確認 MC-001〜012 |
-| 次のアクション | stage1.txt → 素材とASSETS.md → renderer.draw → main.py → 工程5（完了確認）→ git |
+| 現在の工程 | 5. 完了確認（完了）。Git コミット済み。GitHub（private）へプッシュ済み: https://github.com/kobataka-team/mario-like-game |
+| 状態 | 全30グループ Green・レビュー APPROVE。render/main/stage1/素材/pygbag ビルドは作成済み。追加テストも APPROVE。残り: 人間による手動確認 MC-001〜012 |
+| 次のアクション | 人間による手動確認 MC-001〜012 |
 
 ## 承認ログ
 | 成果物 | 人間の承認 | 日付 |

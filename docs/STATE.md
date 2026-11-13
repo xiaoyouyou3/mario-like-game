@@ -4,9 +4,9 @@
 
 | 項目 | 値 |
 |---|---|
-| 現在の工程 | 変更要求（2026-11-13: 画面を 592x304 の横長にし、地面の操作パネルへ仮想ボタンを移す）。要件は承認済み。変更要求は 1〜4 の工程を完了（要件・設計は人間承認済み、各レビュー APPROVE）。完了済みの 1〜5 工程は <https://github.com/xiaoyouyou3/mario-like-game> に公開済み、Web 版は https://xiaoyouyou3.github.io/mario-like-game/ |
-| 状態 | 要件書を更新済み（REQ-041, 102 変更 / REQ-052〜056 追加）。要件は人間承認済み。基本設計を更新済み（DES-001/015/016/018、ADR 14・15、§6.1 追加）。基本設計は人間承認済み。テスト仕様を更新済み（TC-080/106/111/113/116 変更、TC-123〜128・MC-013/014 追加、trace_check spec OK）。テスト仕様レビュー 1回目 APPROVE（G26b・G27b に分割済み）。TDD: Red（19件失敗、有効）→ テストコード APPROVE → Green 完了（248件通過、ruff OK）。コードレビュー APPROVE。Web 版を再ビルドし gh-pages へ再デプロイ済み（2026-11-13）。残り: 人間による手動確認 MC-013/014（iPhone 実機で操作パネルとボタンの位置） |
-| 次のアクション | TDD: G19（TC-080/116 変更）→ G26/G26b → G27/G27b の順に Red → Green |
+| 現在の工程 | 変更要求 2 件目（2026-11-13: 穴を画面の下端まで通す。案 A）。変更要求 2 件目は 1〜4 の工程を完了（要件・設計は人間承認済み、各レビュー APPROVE）。1 件目（画面を 592x304 の横長にし、地面の操作パネルへ仮想ボタンを移す）は完了・公開済み。要件は承認済み。変更要求は 1〜4 の工程を完了（要件・設計は人間承認済み、各レビュー APPROVE）。完了済みの 1〜5 工程は <https://github.com/xiaoyouyou3/mario-like-game> に公開済み、Web 版は https://xiaoyouyou3.github.io/mario-like-game/ |
+| 状態 | 【2件目】要件書を更新済み（REQ-052, 054 変更 / REQ-057, 058 追加）。要件は人間承認済み。基本設計を更新済み（DES-016、ADR 16）。基本設計も人間承認済み。テスト仕様を更新済み（TC-129〜131・MC-015 追加、MC-013 変更、trace_check spec OK）。テスト仕様レビュー APPROVE。TDD: G28 Red 確認済み（7件失敗、有効）。テストコード APPROVE → Green 完了（255件通過）。コードレビュー APPROVE。コミット・プッシュ・再ビルド・gh-pages へ再デプロイ済み（2026-11-13）。残り: 人間による手動確認 MC-013/014/015（macOS と iPhone 実機）。【1件目の状態】要件書を更新済み（REQ-041, 102 変更 / REQ-052〜056 追加）。要件は人間承認済み。基本設計を更新済み（DES-001/015/016/018、ADR 14・15、§6.1 追加）。基本設計は人間承認済み。テスト仕様を更新済み（TC-080/106/111/113/116 変更、TC-123〜128・MC-013/014 追加、trace_check spec OK）。テスト仕様レビュー 1回目 APPROVE（G26b・G27b に分割済み）。TDD: Red（19件失敗、有効）→ テストコード APPROVE → Green 完了（248件通過、ruff OK）。コードレビュー APPROVE。Web 版を再ビルドし gh-pages へ再デプロイ済み（2026-11-13）。残り: 人間による手動確認 MC-013/014（iPhone 実機で操作パネルとボタンの位置） |
+| 次のアクション | 【2件目】基本設計（DES-016 の更新）→ テスト仕様 → TDD → 再デプロイ。【1件目】TDD: G19（TC-080/116 変更）→ G26/G26b → G27/G27b の順に Red → Green |
 
 ## 承認ログ
 | 成果物 | 人間の承認 | 日付 |
@@ -15,6 +15,8 @@
 | 基本設計書 | 済（人間の指示「REQ-051 反映後にレビューを通過したら進める」。基本設計レビュー3回目 APPROVE で確定） | 2026-11-03 |
 | 変更要求 画面サイズ・操作パネル（要件 REQ-041, 102 変更 / REQ-052〜056 追加） | 済（要件レビュー2回目 APPROVE 後、人間が「承認」） | 2026-11-13 |
 | 変更要求 画面サイズ・操作パネル（基本設計 DES-001/015/016/018、ADR 14・15、§6.1） | 済（基本設計レビュー1回目 APPROVE 後、人間が「承認」） | 2026-11-13 |
+| 変更要求 穴を画面の下端まで通す（要件 REQ-052, 054 変更 / REQ-057, 058 追加） | 済（要件レビュー1回目 APPROVE 後、人間が「承認」） | 2026-11-13 |
+| 変更要求 穴を画面の下端まで通す（基本設計 DES-016、ADR 16） | 済（基本設計レビュー1回目 APPROVE 後、人間が「承認」） | 2026-11-13 |
 
 ## レビュー履歴
 | 工程 | 往復 | 判定 | レビューファイル | 未解決 Must |
@@ -23,6 +25,11 @@
 | 1. 要件定義 | 2 | APPROVE | docs/reviews/requirements-review-2.md | なし（Should 2件: 優先度の偏り、REQ-049 の表外→表内に修正済み） |
 | 変更要求 画面サイズ・操作パネル（2026-11-13） | 要件1 | REJECT | docs/reviews/requirements-review-4.md | REQ-R-001（REQ-052/053 を分割して修正済み・再レビューで確認）。Should 2件も対応済み |
 | 変更要求 画面サイズ・操作パネル（2026-11-13） | 要件2 | APPROVE | docs/reviews/requirements-review-5.md | なし（Should 0件） |
+| 変更要求 穴を画面の下端まで通す（2026-11-13、案 A） | 要件1 | APPROVE | docs/reviews/requirements-review-6.md | なし（Should REQ-R-004/005: REQ-054 の対象限定と REQ-057 の前提追加で対応済み） |
+| 変更要求 穴を画面の下端まで通す 基本設計 | 1 | APPROVE | docs/reviews/basic-design-review-5.md | なし（Should DES-R-007: 全列を地面にする条件を screen が PLAYING でないときに一本化して対応済み） |
+| 変更要求 穴を画面の下端まで通す テスト仕様 | 1 | APPROVE | docs/reviews/test-spec-review-4.md | なし（Should SPEC-R-014 は前回 G26b/G27b に分割済みで、数え間違いのため対応不要） |
+| 変更要求 穴を画面の下端まで通す テストコード | 1 | APPROVE | docs/reviews/test-code-review-batch14.md | なし |
+| 変更要求 穴を画面の下端まで通す 実装 | 1 | APPROVE | docs/reviews/code-review-batch13.md | なし |
 | 変更要求 画面サイズ・操作パネル 基本設計 | 1 | APPROVE | docs/reviews/basic-design-review-4.md | なし（Should 0件） |
 | 変更要求 画面サイズ・操作パネル テスト仕様 | 1 | APPROVE | docs/reviews/test-spec-review-3.md | なし（Should SPEC-R-014: G26/G27 を G26b/G27b に分割して対応済み） |
 | 変更要求 画面サイズ・操作パネル テストコード | 1 | APPROVE | docs/reviews/test-code-review-batch13.md | なし（Should TEST-R-001: 対応不要） |

@@ -5,6 +5,7 @@ from __future__ import annotations
 import pygame
 
 from src.game.constants import (
+    PANEL_H,
     PLAY_H,
     SCREEN_H,
     SCREEN_W,
@@ -18,6 +19,7 @@ from src.game.hud import build_hud
 from src.game.level import Level
 from src.game.session import GameSession, Screen
 from src.game.stage_data import TileKind
+from src.game.tilemap import TileMap
 from src.render.assets import Assets
 from src.render.touch_controls import default_layout
 
@@ -29,6 +31,7 @@ def compute_scale(window_w: int, window_h: int) -> float:
 
 SKY = (92, 148, 252)
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 BUTTON_FILL = (255, 255, 255, 90)
 BUTTON_LABELS = (("left", "<"), ("right", ">"), ("run", "RUN"), ("jump", "JUMP"))
 HUD_X = (4, 84, 164)  # px
@@ -74,10 +77,15 @@ def _enemy_sprite(enemy: Enemy, assets: Assets) -> pygame.Surface:
     return assets.images["shell"]
 
 
-def _draw_level(surface: pygame.Surface, level: Level, assets: Assets) -> None:
+def _draw_level_background(surface: pygame.Surface, level: Level, assets: Assets) -> None:
     camera = int(level.camera_x)
     _draw_tiles(surface, level, assets, camera)
     _draw_flag(surface, level, assets, camera)
+
+
+def _draw_entities(surface: pygame.Surface, level: Level, assets: Assets) -> None:
+    """敵とプレイヤー。クリップせず描くので、穴に落ちる間も操作パネルの高さまで見える。"""
+    camera = int(level.camera_x)
     for enemy in level.enemies:
         box = enemy.body.box
         surface.blit(_enemy_sprite(enemy, assets), (int(box.x) - camera, int(box.y)))
@@ -110,19 +118,39 @@ def _draw_touch_buttons(surface: pygame.Surface, assets: Assets) -> None:
         surface.blit(button, (int(box.x), int(box.y)))
 
 
-def _draw_panel(surface: pygame.Surface, assets: Assets) -> None:
-    """y = PLAY_H から下端までを、地面のタイルで塗る。"""
+def column_has_ground(tilemap: TileMap, col: int) -> bool:
+    """最下段のマスが固体なら True。穴の列は False。"""
+    return tilemap.is_solid(col, STAGE_H_TILES - 1)
+
+
+def _draw_ground_column(surface: pygame.Surface, assets: Assets, x: int) -> None:
     tile = assets.images["solid"]
     for y in range(PLAY_H, SCREEN_H, TILE_SIZE):
+        surface.blit(tile, (x, y))
+
+
+def _draw_panel(surface: pygame.Surface, assets: Assets, level: Level | None) -> None:
+    """操作パネルを列ごとに塗る。穴の列は黒。level が None なら全列を地面で塗る。"""
+    if level is None:
         for x in range(0, SCREEN_W, TILE_SIZE):
-            surface.blit(tile, (x, y))
+            _draw_ground_column(surface, assets, x)
+        return
+    camera = int(level.camera_x)
+    first = camera // TILE_SIZE
+    last = min((camera + SCREEN_W) // TILE_SIZE + 1, STAGE_W_TILES)
+    for col in range(first, last):
+        x = col * TILE_SIZE - camera
+        if column_has_ground(level.tilemap, col):
+            _draw_ground_column(surface, assets, x)
+        else:
+            surface.fill(BLACK, pygame.Rect(x, PLAY_H, TILE_SIZE, PANEL_H))
 
 
 def _draw_stage_area(
     surface: pygame.Surface, session: GameSession, assets: Assets
 ) -> None:
     if session.screen is Screen.PLAYING and session.level is not None:
-        _draw_level(surface, session.level, assets)
+        _draw_level_background(surface, session.level, assets)
         _draw_hud(surface, session, assets)
     elif session.screen is Screen.TITLE:
         _text(surface, assets, "MARIO-LIKE", 80)
@@ -139,10 +167,14 @@ def draw(
     surface: pygame.Surface, session: GameSession, assets: Assets, touch_visible: bool
 ) -> None:
     """内部解像度の面に、現在の画面を描く。ステージ領域は y < PLAY_H にクリップする。"""
+    playing = session.screen is Screen.PLAYING and session.level is not None
+    level = session.level if playing else None
     surface.fill(SKY)
     surface.set_clip(pygame.Rect(0, 0, SCREEN_W, PLAY_H))
     _draw_stage_area(surface, session, assets)
     surface.set_clip(None)
-    _draw_panel(surface, assets)
+    _draw_panel(surface, assets, level)
+    if level is not None:
+        _draw_entities(surface, level, assets)
     if touch_visible:
         _draw_touch_buttons(surface, assets)

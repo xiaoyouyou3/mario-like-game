@@ -10,9 +10,12 @@ import pytest
 
 from src.game.geometry import Aabb
 from src.game.input_state import HeldButtons
+from src.game.stage_data import parse_stage
+from src.game.tilemap import TileMap
 from src.render.input_mapper import detect_touch_device, keys_to_held
-from src.render.renderer import compute_scale
+from src.render.renderer import column_has_ground, compute_scale
 from src.render.touch_controls import TouchLayout, default_layout, points_to_held
+from tests.conftest import stage_text
 
 BUTTONS = ("left", "right", "jump", "run")
 
@@ -150,3 +153,33 @@ def test_compute_scale_is_the_smaller_of_the_width_and_height_ratios(
 @pytest.mark.parametrize(("width", "height"), [(0, 304), (592, 0), (0, 0)])
 def test_compute_scale_is_zero_for_a_window_with_no_width_or_height(width: int, height: int) -> None:
     assert compute_scale(width, height) == pytest.approx(0.0)
+
+
+# TC-129
+@pytest.mark.parametrize(("col", "expected"), [(9, True), (10, False), (11, False), (12, True)])
+def test_column_has_ground_is_false_only_for_the_pit_columns(col: int, expected: bool) -> None:
+    cells = {(10, 14): ".", (11, 14): "."}
+    tilemap = TileMap(parse_stage(stage_text(cells, ground=True)))
+
+    result = column_has_ground(tilemap, col)
+
+    assert result is expected
+
+
+# TC-130
+def test_column_has_ground_looks_only_at_the_bottom_row() -> None:
+    tilemap = TileMap(parse_stage(stage_text({(20, 13): "#"})))
+
+    result = column_has_ground(tilemap, 20)
+
+    assert result is False
+
+
+# TC-131
+@pytest.mark.parametrize("col", [-1, 200])
+def test_column_has_ground_is_true_outside_the_stage_edges(col: int) -> None:
+    tilemap = TileMap(parse_stage(stage_text()))
+
+    result = column_has_ground(tilemap, col)
+
+    assert result is True

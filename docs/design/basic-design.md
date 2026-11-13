@@ -1,6 +1,6 @@
 # 基本設計書
 
-最終更新: 2026-11-13 / 状態: 変更要求（画面サイズ・操作パネル）を反映中・レビューと人間の承認待ち / 対応要件: docs/requirements/requirements.md（REQ-001〜056, 101〜105）
+最終更新: 2026-11-13 / 状態: 変更要求 2 件目（穴を画面の下端まで通す）を反映中・レビューと人間の承認待ち（1 件目は承認済み）/ 対応要件: docs/requirements/requirements.md（REQ-001〜058, 101〜105）
 
 ## 1. 要件割当表（空欄禁止）
 | REQ | 担当 DES | 備考 |
@@ -50,11 +50,13 @@
 | REQ-042 | DES-004, DES-019, DES-018 | 解析は DES-004、データは DES-019、読込は DES-018 |
 | REQ-043 | DES-004, DES-019 | 解析時に寸法を検証 |
 | REQ-044 | DES-015, DES-016 | |
-| REQ-052 | DES-016, DES-001 | 下部 64 px を地面の絵で描く。寸法は constants |
+| REQ-052 | DES-016, DES-001 | 下部 64 px を、最下段が地面の列だけ地面の絵で描く（ステージの地面の続き）。寸法は constants |
 | REQ-053 | DES-015, DES-016 | 配置は DES-015（§6.1）、描画は DES-016 |
-| REQ-054 | DES-016, DES-001 | ステージ・プレイヤー・敵・HUD を y<240 にクリップして描く |
+| REQ-054 | DES-016, DES-001 | ステージ本体のタイル・旗・HUD を y<240 にクリップして描く |
 | REQ-055 | DES-016 | 操作パネルは touch_visible に関係なく描く |
 | REQ-056 | DES-015 | ボタン配置が互いに重ならず 48 px 以上（§6.1） |
+| REQ-057 | DES-016 | 最下段が空の列は操作パネルを黒で塗る。判定は `column_has_ground` |
+| REQ-058 | DES-016 | プレイヤーと敵は操作パネルの後にクリップなしで描く |
 | REQ-045 | DES-002, DES-014, DES-015 | キーもタッチも同じ HeldButtons に変換 |
 | REQ-046 | DES-014, DES-016 | 端末判定は DES-014 |
 | REQ-047 | DES-017 | 素材一覧 docs/assets/ASSETS.md |
@@ -106,7 +108,7 @@
 | DES-013 | src/game/hud.py | 残機・コイン・スコアの表示文字列を作る | session | REQ-038 |
 | DES-014 | src/render/input_mapper.py | キーボード状態を HeldButtons に変換し、タッチ端末かを判定する | game.input_state, pygame | REQ-045, REQ-046 |
 | DES-015 | src/render/touch_controls.py | タッチ座標を仮想ボタンの HeldButtons に変換する | game.input_state | REQ-044, REQ-045, REQ-053, REQ-056, REQ-104 |
-| DES-016 | src/render/renderer.py | Session の状態を、ステージ領域（上 240 px）と操作パネル（下 64 px）に分けて内部解像度の面に描き、表示倍率を計算する | game, assets, touch_controls, pygame | REQ-038, REQ-044, REQ-046, REQ-052, REQ-053, REQ-054, REQ-055, REQ-102 |
+| DES-016 | src/render/renderer.py | Session の状態を、ステージ領域（上 240 px）・操作パネル（下 64 px）・プレイヤーと敵の順に内部解像度の面へ描き、表示倍率を計算する | game, assets, touch_controls, pygame | REQ-038, REQ-044, REQ-046, REQ-052, REQ-053, REQ-054, REQ-055, REQ-057, REQ-058, REQ-102 |
 | DES-017 | src/render/assets.py | CC0 のドット絵を読み込み、出所を docs/assets/ASSETS.md に記録する | pygame | REQ-047 |
 | DES-018 | src/main.py | 初期化・固定ステップのループ・ステージファイル読込・内部描画面の拡大表示・タッチ座標の変換を行う | render, game | REQ-042, REQ-101, REQ-102, REQ-103, REQ-104, REQ-105 |
 | DES-019 | assets/stages/stage1.txt | 1面のタイル・敵・?ブロック・旗・開始位置を文字で記述する | - | REQ-042, REQ-043 |
@@ -236,10 +238,15 @@ def points_to_held(points: Sequence[tuple[float, float]], layout: TouchLayout) -
 # render/renderer.py
 def compute_scale(window_w: int, window_h: int) -> float:
     """min(window_w / SCREEN_W, window_h / SCREEN_H)。小数。ウィンドウの幅か高さが 0 のとき 0.0"""
+def column_has_ground(tilemap: TileMap, col: int) -> bool:
+    """最下段（row = STAGE_H_TILES - 1）のマスが固体なら True。穴の列は False。範囲外の列は TileMap.is_solid に従う"""
 def draw(surface: pygame.Surface, session: GameSession, assets: Assets, touch_visible: bool) -> None:
-    """ステージ・プレイヤー・敵・HUD・タイトル・クリア・ゲームオーバーの文字は y < PLAY_H の範囲にだけ描く（クリップ）。
-    その後、y = PLAY_H から PANEL_H の範囲を地面のタイルで塗る（touch_visible に関係なく常に）。
-    touch_visible のときだけ、操作パネルの上に仮想ボタンを描く"""
+    """描く順序:
+    1. ステージ本体のタイル・旗・HUD・タイトル・クリア・ゲームオーバーの文字を、y < PLAY_H にクリップして描く
+    2. 操作パネル（y = PLAY_H から SCREEN_H）を、タイルの列ごとに塗る。column_has_ground が真の列は地面のタイル、偽の列は黒。
+       `session.screen` が PLAYING でない画面（タイトル・クリア・ゲームオーバー）では、Level の有無に関係なく全列を地面のタイルで塗る。touch_visible に関係なく常に塗る
+    3. プレイヤーと敵を、クリップなしで描く（穴に落ちる間も操作パネルの高さまで見える）
+    4. touch_visible のときだけ、仮想ボタンを描く"""
 
 # main.py
 async def main() -> None:
@@ -262,7 +269,7 @@ async def main() -> None:
 | 9 | Level | 判定: プレイヤー上端 > ステージ下端、プレイヤー右端 <= カメラ x（更新前の値）、または死亡接触なら PLAYER_DIED。旗に重なれば CLEARED。両方成立したら PLAYER_DIED |
 | 10 | Level | `next_camera_x` でカメラ更新（死亡・クリアのフレームも更新する） |
 | 11 | Session | TITLE から PLAYING へ移るときは、`lives=INITIAL_LIVES`、`coins=0`、`score=0` に戻して新しい Level を作る。PLAYING 中は、コインがあれば `coins` と `score`（+100/枚）を更新。PLAYER_DIED なら `lives` を 1 減らし、0 超なら新しい Level を作る（敵・?ブロック・開始位置が初期化され、coins/score は保つ）、0 なら GAME_OVER。CLEARED なら CLEAR |
-| 12 | render | `build_hud` の文字列と Session / Level の状態を、ステージ領域（y < PLAY_H）にクリップして描く → 操作パネルを描く → 仮想ボタンを描く（タッチ端末のみ）。内部描画面は、縦横比を保ち小数倍で拡大して表示する |
+| 12 | render | `build_hud` の文字列と Session / Level の状態を、ステージ領域（y < PLAY_H）にクリップして描く → 操作パネルを列ごとに描く（穴の列は黒）→ プレイヤーと敵を描く → 仮想ボタンを描く（タッチ端末のみ）。内部描画面は、縦横比を保ち小数倍で拡大して表示する |
 
 ## 6. 定数表（`src/game/constants.py` に集約）
 | 名前 | 値 | 単位 | 出典 |
@@ -326,6 +333,7 @@ async def main() -> None:
 | 13 | ジャンプのコヨーテタイムとバッファは入れない | game-knowledge.md の定石どおり入れる | REQ-005「空中ではジャンプしない」に反し、要件にない機能になるため（YAGNI） |
 | 14 | 内部描画面の拡大は縦横比を保った小数倍にする。倍率は `min(window_w / SCREEN_W, window_h / SCREEN_H)` | 整数倍のみ。整数倍を基本にして足りないときだけ小数倍 | 整数倍では iPhone の横向き（高さ約 375 px）で倍率が 1 に固定され、画面が小さいままになる（人間の指摘）。REQ-102 が小数倍を許可した。倍率の計算は純関数にできテストしやすい |
 | 15 | 仮想ボタンとゲーム画面は別領域にする。ステージ領域（上 240 px）への描画はクリップし、下 64 px を操作パネルとして常に描く | ゲーム画面の上にボタンを半透明で重ねる（従来）。タッチ端末でだけ画面を伸ばす | 重ねるとマリオや敵が隠れる（人間の指摘）。端末で画面の構成が変わると、検証が端末ごとになる。常に同じ構成にすれば REQ-055 も満たせ、描画の分岐が減る |
+| 16 | 操作パネルは、ステージの地面の続きとして列ごとに描く。最下段が空の列は黒で塗り、プレイヤーと敵はクリップなしで操作パネルの後に描く | 操作パネルを一様な地面で塗る（1 件目の実装）。ステージを 2 段深くして穴を 64 px にする | 一様な地面では穴が 32 px の凹みに見える（人間の指摘）。列ごとの判定は純関数 `column_has_ground` にでき、描画の分岐が 1 つ増えるだけ。ステージの寸法（REQ-043）やステージファイルを変えずに済む。プレイヤーと敵をクリップしないと、穴に落ちる途中で y=240 の線で消えてしまう |
 
 ## 8. 注意・リスク（人間への共有事項）
 - **小数倍の拡大**: ドットの幅が一部不均一に見えることがある（REQ-102、人間が選択）。

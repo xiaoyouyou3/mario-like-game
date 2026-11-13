@@ -1,8 +1,11 @@
 """物理・寸法・得点の定数（単位をコメントする）。"""
 
 FIXED_DT: float = 1 / 60  # s (REQ-101)
-SCREEN_W: int = 256  # px (REQ-102)
-SCREEN_H: int = 240  # px (REQ-102)
+SCREEN_W: int = 592  # px (REQ-102)
+SCREEN_H: int = 304  # px (REQ-102)
+PLAY_H: int = 240  # px (REQ-054) ステージ領域の高さ
+PANEL_H: int = 64  # px (REQ-052) 操作パネルの高さ
+TOUCH_BUTTON_SIZE: int = 48  # px (REQ-056)
 TILE_SIZE: int = 16  # px
 STAGE_W_TILES: int = 200  # tiles (DES-004)
 STAGE_H_TILES: int = 15  # tiles (DES-004)

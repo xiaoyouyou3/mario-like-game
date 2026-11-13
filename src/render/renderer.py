@@ -5,6 +5,7 @@ from __future__ import annotations
 import pygame
 
 from src.game.constants import (
+    PLAY_H,
     SCREEN_H,
     SCREEN_W,
     STAGE_H_TILES,
@@ -21,9 +22,9 @@ from src.render.assets import Assets
 from src.render.touch_controls import default_layout
 
 
-def compute_scale(window_w: int, window_h: int) -> int:
-    """ウィンドウに収まる最大の整数倍率。最小 1。"""
-    return max(1, min(window_w // SCREEN_W, window_h // SCREEN_H))
+def compute_scale(window_w: int, window_h: int) -> float:
+    """縦横比を保ってウィンドウに収まる最大の倍率（小数）。幅か高さが 0 なら 0.0。"""
+    return min(window_w / SCREEN_W, window_h / SCREEN_H)
 
 
 SKY = (92, 148, 252)
@@ -109,11 +110,17 @@ def _draw_touch_buttons(surface: pygame.Surface, assets: Assets) -> None:
         surface.blit(button, (int(box.x), int(box.y)))
 
 
-def draw(
-    surface: pygame.Surface, session: GameSession, assets: Assets, touch_visible: bool
+def _draw_panel(surface: pygame.Surface, assets: Assets) -> None:
+    """y = PLAY_H から下端までを、地面のタイルで塗る。"""
+    tile = assets.images["solid"]
+    for y in range(PLAY_H, SCREEN_H, TILE_SIZE):
+        for x in range(0, SCREEN_W, TILE_SIZE):
+            surface.blit(tile, (x, y))
+
+
+def _draw_stage_area(
+    surface: pygame.Surface, session: GameSession, assets: Assets
 ) -> None:
-    """内部解像度の面に、現在の画面を描く。"""
-    surface.fill(SKY)
     if session.screen is Screen.PLAYING and session.level is not None:
         _draw_level(surface, session.level, assets)
         _draw_hud(surface, session, assets)
@@ -126,5 +133,16 @@ def draw(
     else:
         _text(surface, assets, "GAME OVER", 80)
         _text(surface, assets, "PRESS Z", 120)
+
+
+def draw(
+    surface: pygame.Surface, session: GameSession, assets: Assets, touch_visible: bool
+) -> None:
+    """内部解像度の面に、現在の画面を描く。ステージ領域は y < PLAY_H にクリップする。"""
+    surface.fill(SKY)
+    surface.set_clip(pygame.Rect(0, 0, SCREEN_W, PLAY_H))
+    _draw_stage_area(surface, session, assets)
+    surface.set_clip(None)
+    _draw_panel(surface, assets)
     if touch_visible:
         _draw_touch_buttons(surface, assets)

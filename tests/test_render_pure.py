@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from itertools import combinations
 
 import pygame
 import pytest
@@ -25,15 +26,43 @@ def _center(box: Aabb) -> tuple[float, float]:
 
 
 # TC-106
-def test_default_layout_fits_the_screen_without_overlapping_buttons() -> None:
-    layout = default_layout()
-    boxes = [layout.left, layout.right, layout.jump, layout.run]
+@pytest.mark.parametrize("name", BUTTONS)
+def test_default_layout_button_fits_inside_the_internal_resolution(name: str) -> None:
+    box = getattr(default_layout(), name)
 
-    inside = all(0 <= b.left and b.right <= 256 and 0 <= b.top and b.bottom <= 240 for b in boxes)
-    pairs_overlap = [
-        boxes[i].overlaps(boxes[j]) for i in range(len(boxes)) for j in range(i + 1, len(boxes))
-    ]
-    assert (inside, any(pairs_overlap)) == (True, False)
+    inside = (box.left >= 0, box.right <= 592, box.top >= 0, box.bottom <= 304)
+
+    assert inside == (True, True, True, True)
+
+
+# TC-123
+@pytest.mark.parametrize("name", BUTTONS)
+def test_default_layout_button_is_inside_the_control_panel(name: str) -> None:
+    box = getattr(default_layout(), name)
+
+    in_panel = (box.top >= 240, box.bottom <= 304)
+
+    assert in_panel == (True, True)
+
+
+# TC-124
+@pytest.mark.parametrize(("first", "second"), list(combinations(BUTTONS, 2)))
+def test_default_layout_buttons_do_not_overlap_each_other(first: str, second: str) -> None:
+    layout = default_layout()
+
+    overlap = getattr(layout, first).overlaps(getattr(layout, second))
+
+    assert overlap is False
+
+
+# TC-125
+@pytest.mark.parametrize("name", BUTTONS)
+def test_default_layout_button_is_at_least_48_px_wide_and_tall(name: str) -> None:
+    box = getattr(default_layout(), name)
+
+    size_ok = (box.w >= 48, box.h >= 48)
+
+    assert size_ok == (True, True)
 
 
 # TC-107
@@ -102,9 +131,22 @@ def test_touch_device_is_not_detected_outside_the_browser() -> None:
 # TC-111
 @pytest.mark.parametrize(
     ("width", "height", "expected"),
-    [(256, 240, 1), (512, 480, 2), (511, 480, 1), (1024, 720, 3), (255, 239, 1), (100, 100, 1), (800, 600, 2)],
+    [
+        (592, 304, 1.0),
+        (1184, 608, 2.0),
+        (888, 456, 1.5),
+        (1184, 304, 1.0),
+        (592, 608, 1.0),
+        (812, 375, 375 / 304),
+    ],
 )
-def test_compute_scale_is_the_largest_whole_multiple_that_fits(
-    width: int, height: int, expected: int
+def test_compute_scale_is_the_smaller_of_the_width_and_height_ratios(
+    width: int, height: int, expected: float
 ) -> None:
-    assert compute_scale(width, height) == expected
+    assert compute_scale(width, height) == pytest.approx(expected)
+
+
+# TC-127
+@pytest.mark.parametrize(("width", "height"), [(0, 304), (592, 0), (0, 0)])
+def test_compute_scale_is_zero_for_a_window_with_no_width_or_height(width: int, height: int) -> None:
+    assert compute_scale(width, height) == pytest.approx(0.0)

@@ -22,23 +22,36 @@ STAGE_PATH = ROOT / "assets" / "stages" / "stage1.txt"
 IMAGE_DIR = ROOT / "assets" / "images"
 MAX_STEPS_PER_FRAME = 5
 FPS = 60
-INITIAL_WINDOW_SCALE = 3
+INITIAL_WINDOW_SCALE = 1.5
 MOUSE_POINT_ID = -1
 BLACK = (0, 0, 0)
 
 Points = dict[int, tuple[float, float]]
 
 
+OUTSIDE = (-1.0, -1.0)  # 内部解像度の外（どのボタンにも当たらない）
+
+
+def _view_size(window_size: tuple[int, int]) -> tuple[int, int]:
+    """ウィンドウに表示される内部描画面の大きさ（縦横比を保った小数倍）。"""
+    scale = compute_scale(*window_size)
+    return (int(SCREEN_W * scale), int(SCREEN_H * scale))
+
+
 def _to_internal(
     x: float, y: float, window_size: tuple[int, int], normalized: bool
 ) -> tuple[float, float]:
-    """ウィンドウ上の座標を、内部解像度（256x240）の座標へ変換する。"""
+    """ウィンドウ上の座標を、内部解像度（592x304）の座標へ変換する。"""
     window_w, window_h = window_size
     scale = compute_scale(window_w, window_h)
-    offset_x = (window_w - SCREEN_W * scale) // 2
-    offset_y = (window_h - SCREEN_H * scale) // 2
+    if scale <= 0:
+        return OUTSIDE
+    view_w, view_h = _view_size(window_size)
     px, py = (x * window_w, y * window_h) if normalized else (x, y)
-    return ((px - offset_x) / scale, (py - offset_y) / scale)
+    return (
+        (px - (window_w - view_w) // 2) / scale,
+        (py - (window_h - view_h) // 2) / scale,
+    )
 
 
 def _update_points(
@@ -60,11 +73,14 @@ def _update_points(
 
 
 def _present(window: pygame.Surface, internal: pygame.Surface) -> None:
-    """内部解像度の面を整数倍に拡大して、ウィンドウの中央に表示する。"""
+    """内部描画面を縦横比を保って拡大し、ウィンドウの中央に表示する。"""
     window_size = window.get_size()
-    scale = compute_scale(*window_size)
-    scaled = pygame.transform.scale(internal, (SCREEN_W * scale, SCREEN_H * scale))
     window.fill(BLACK)
+    view_w, view_h = _view_size(window_size)
+    if view_w <= 0 or view_h <= 0:
+        pygame.display.flip()
+        return
+    scaled = pygame.transform.scale(internal, (view_w, view_h))
     window.blit(
         scaled,
         (
@@ -79,7 +95,7 @@ async def main() -> None:
     pygame.init()
     pygame.display.set_caption("Mario-like")
     window = pygame.display.set_mode(
-        (SCREEN_W * INITIAL_WINDOW_SCALE, SCREEN_H * INITIAL_WINDOW_SCALE),
+        (int(SCREEN_W * INITIAL_WINDOW_SCALE), int(SCREEN_H * INITIAL_WINDOW_SCALE)),
         pygame.RESIZABLE,
     )
     internal = pygame.Surface((SCREEN_W, SCREEN_H))

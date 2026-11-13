@@ -30,7 +30,7 @@ def test_camera_never_moves_back_to_the_left() -> None:
 # TC-080
 @pytest.mark.parametrize(
     ("prev", "center", "expected"),
-    [(0, 3190, 2944), (2944, 100, 2944), (0, 0, 0)],
+    [(0, 3190, 2608), (2608, 100, 2608), (0, 0, 0)],
 )
 def test_camera_stays_within_the_stage(prev: float, center: float, expected: float) -> None:
     result = next_camera_x(prev, center, LEVEL_W)
@@ -41,7 +41,7 @@ def test_camera_stays_within_the_stage(prev: float, center: float, expected: flo
 # TC-116
 @pytest.mark.parametrize(
     ("center", "expected"),
-    [(700, 572), (3071, 2943), (3072, 2944), (3500, 2944)],
+    [(700, 572), (2735, 2607), (2736, 2608), (3500, 2608)],
 )
 def test_camera_advances_from_a_nonzero_position_up_to_the_maximum(
     center: float, expected: float

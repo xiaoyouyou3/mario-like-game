@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 
+from src.game.constants import PLAY_H, SCREEN_W, TOUCH_BUTTON_SIZE
 from src.game.geometry import Aabb
 from src.game.input_state import HeldButtons
 
@@ -17,13 +18,22 @@ class TouchLayout:
     run: Aabb
 
 
+PANEL_MARGIN = 8  # px 操作パネルの上端とボタンの間、ボタン同士の間
+SIDE_MARGIN = 16  # px 画面の左右端とボタンの間
+
+
 def default_layout() -> TouchLayout:
-    """内部解像度 256x240 の下端に、左右の移動ボタンを左、ダッシュとジャンプを右に置く。"""
+    """操作パネル（y >= PLAY_H）の中に、左右の移動ボタンを左、ダッシュとジャンプを右に置く。"""
+    size = TOUCH_BUTTON_SIZE
+    top = PLAY_H + PANEL_MARGIN
+    right_x = SIDE_MARGIN + size + PANEL_MARGIN
+    jump_x = SCREEN_W - SIDE_MARGIN - size
+    run_x = jump_x - PANEL_MARGIN - size
     return TouchLayout(
-        left=Aabb(8, 192, 40, 40),
-        right=Aabb(56, 192, 40, 40),
-        run=Aabb(160, 192, 40, 40),
-        jump=Aabb(208, 192, 40, 40),
+        left=Aabb(SIDE_MARGIN, top, size, size),
+        right=Aabb(right_x, top, size, size),
+        run=Aabb(run_x, top, size, size),
+        jump=Aabb(jump_x, top, size, size),
     )
 
 

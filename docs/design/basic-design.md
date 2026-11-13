@@ -1,6 +1,6 @@
 # 基本設計書
 
-最終更新: 2026-11-03 / 状態: 承認済 / 対応要件: docs/requirements/requirements.md（REQ-001〜051, 101〜105）
+最終更新: 2026-11-13 / 状態: 変更要求（画面サイズ・操作パネル）を反映中・レビューと人間の承認待ち / 対応要件: docs/requirements/requirements.md（REQ-001〜056, 101〜105）
 
 ## 1. 要件割当表（空欄禁止）
 | REQ | 担当 DES | 備考 |
@@ -46,10 +46,15 @@
 | REQ-038 | DES-013, DES-016 | 値の整形は DES-013、描画は DES-016 |
 | REQ-039 | DES-010 | |
 | REQ-040 | DES-010 | |
-| REQ-041 | DES-010 | |
+| REQ-041 | DES-010 | 上限は level_width - SCREEN_W（SCREEN_W=592） |
 | REQ-042 | DES-004, DES-019, DES-018 | 解析は DES-004、データは DES-019、読込は DES-018 |
 | REQ-043 | DES-004, DES-019 | 解析時に寸法を検証 |
 | REQ-044 | DES-015, DES-016 | |
+| REQ-052 | DES-016, DES-001 | 下部 64 px を地面の絵で描く。寸法は constants |
+| REQ-053 | DES-015, DES-016 | 配置は DES-015（§6.1）、描画は DES-016 |
+| REQ-054 | DES-016, DES-001 | ステージ・プレイヤー・敵・HUD を y<240 にクリップして描く |
+| REQ-055 | DES-016 | 操作パネルは touch_visible に関係なく描く |
+| REQ-056 | DES-015 | ボタン配置が互いに重ならず 48 px 以上（§6.1） |
 | REQ-045 | DES-002, DES-014, DES-015 | キーもタッチも同じ HeldButtons に変換 |
 | REQ-046 | DES-014, DES-016 | 端末判定は DES-014 |
 | REQ-047 | DES-017 | 素材一覧 docs/assets/ASSETS.md |
@@ -57,7 +62,7 @@
 | REQ-049 | DES-009, DES-008 | 滑走開始からの経過フレームを敵が持つ |
 | REQ-050 | DES-012 | コイン数・スコアは Session が持つ |
 | REQ-101 | DES-018, DES-001 | 固定ステップ 1/60 |
-| REQ-102 | DES-016 | 整数倍率の計算 |
+| REQ-102 | DES-016, DES-001, DES-018 | 倍率の計算は DES-016、解像度は DES-001、拡大表示とタッチ座標の変換は DES-018 |
 | REQ-103 | DES-018 | Web 版を Chrome で確認（手動） |
 | REQ-104 | DES-018, DES-015 | Web 版を iPhone 12 mini で確認（手動） |
 | REQ-105 | DES-018 | |
@@ -86,7 +91,7 @@
 ## 3. モジュール責務
 | ID | モジュール | 責務（1文） | 依存してよいもの | 対応REQ |
 |---|---|---|---|---|
-| DES-001 | src/game/constants.py | 物理・寸法・得点の定数に名前と単位を与える | なし | REQ-101 |
+| DES-001 | src/game/constants.py | 物理・寸法・得点の定数に名前と単位を与える | なし | REQ-052, REQ-054, REQ-101, REQ-102 |
 | DES-002 | src/game/input_state.py | 押下状態（HeldButtons）から、押した瞬間を含む InputState を作る | なし | REQ-045 |
 | DES-003 | src/game/geometry.py | 矩形の重なり判定とタイル番号の計算を提供する | constants | -（DES-006, 009 が利用する下位部品） |
 | DES-004 | src/game/stage_data.py | ステージの文字列を検証して StageData に変換する | constants, geometry | REQ-042, REQ-043 |
@@ -100,10 +105,10 @@
 | DES-012 | src/game/session.py | 画面遷移と残機・コイン・スコアを管理し、Level を作り直す | level, stage_data | REQ-028, REQ-029, REQ-031, REQ-032, REQ-033, REQ-034, REQ-035, REQ-036, REQ-037, REQ-048, REQ-050 |
 | DES-013 | src/game/hud.py | 残機・コイン・スコアの表示文字列を作る | session | REQ-038 |
 | DES-014 | src/render/input_mapper.py | キーボード状態を HeldButtons に変換し、タッチ端末かを判定する | game.input_state, pygame | REQ-045, REQ-046 |
-| DES-015 | src/render/touch_controls.py | タッチ座標を仮想ボタンの HeldButtons に変換する | game.input_state | REQ-044, REQ-045, REQ-104 |
-| DES-016 | src/render/renderer.py | Session の状態を内部解像度の面に描き、整数倍率を計算する | game, assets, touch_controls, pygame | REQ-038, REQ-044, REQ-046, REQ-102 |
+| DES-015 | src/render/touch_controls.py | タッチ座標を仮想ボタンの HeldButtons に変換する | game.input_state | REQ-044, REQ-045, REQ-053, REQ-056, REQ-104 |
+| DES-016 | src/render/renderer.py | Session の状態を、ステージ領域（上 240 px）と操作パネル（下 64 px）に分けて内部解像度の面に描き、表示倍率を計算する | game, assets, touch_controls, pygame | REQ-038, REQ-044, REQ-046, REQ-052, REQ-053, REQ-054, REQ-055, REQ-102 |
 | DES-017 | src/render/assets.py | CC0 のドット絵を読み込み、出所を docs/assets/ASSETS.md に記録する | pygame | REQ-047 |
-| DES-018 | src/main.py | 初期化・固定ステップのループ・ステージファイル読込を行う | render, game | REQ-042, REQ-101, REQ-103, REQ-104, REQ-105 |
+| DES-018 | src/main.py | 初期化・固定ステップのループ・ステージファイル読込・内部描画面の拡大表示・タッチ座標の変換を行う | render, game | REQ-042, REQ-101, REQ-102, REQ-103, REQ-104, REQ-105 |
 | DES-019 | assets/stages/stage1.txt | 1面のタイル・敵・?ブロック・旗・開始位置を文字で記述する | - | REQ-042, REQ-043 |
 
 ### ステージファイルの文字
@@ -223,14 +228,18 @@ def detect_touch_device() -> bool:
 # render/touch_controls.py
 @dataclass(frozen=True)
 class TouchLayout: left: Aabb; right: Aabb; jump: Aabb; run: Aabb   # 内部解像度の座標
-def default_layout() -> TouchLayout: ...
+def default_layout() -> TouchLayout:
+    """§6.1 の配置を返す。4 つとも操作パネル内（y >= PLAY_H）で、互いに重ならず、幅と高さが TOUCH_BUTTON_SIZE"""
 def points_to_held(points: Sequence[tuple[float, float]], layout: TouchLayout) -> HeldButtons:
     """点が入っているボタンを押下とみなす。複数点で複数ボタン"""
 
 # render/renderer.py
-def compute_scale(window_w: int, window_h: int) -> int:
-    """min(window_w // SCREEN_W, window_h // SCREEN_H)。最小 1"""
-def draw(surface: pygame.Surface, session: GameSession, assets: Assets, touch_visible: bool) -> None: ...
+def compute_scale(window_w: int, window_h: int) -> float:
+    """min(window_w / SCREEN_W, window_h / SCREEN_H)。小数。ウィンドウの幅か高さが 0 のとき 0.0"""
+def draw(surface: pygame.Surface, session: GameSession, assets: Assets, touch_visible: bool) -> None:
+    """ステージ・プレイヤー・敵・HUD・タイトル・クリア・ゲームオーバーの文字は y < PLAY_H の範囲にだけ描く（クリップ）。
+    その後、y = PLAY_H から PANEL_H の範囲を地面のタイルで塗る（touch_visible に関係なく常に）。
+    touch_visible のときだけ、操作パネルの上に仮想ボタンを描く"""
 
 # main.py
 async def main() -> None:
@@ -253,13 +262,16 @@ async def main() -> None:
 | 9 | Level | 判定: プレイヤー上端 > ステージ下端、プレイヤー右端 <= カメラ x（更新前の値）、または死亡接触なら PLAYER_DIED。旗に重なれば CLEARED。両方成立したら PLAYER_DIED |
 | 10 | Level | `next_camera_x` でカメラ更新（死亡・クリアのフレームも更新する） |
 | 11 | Session | TITLE から PLAYING へ移るときは、`lives=INITIAL_LIVES`、`coins=0`、`score=0` に戻して新しい Level を作る。PLAYING 中は、コインがあれば `coins` と `score`（+100/枚）を更新。PLAYER_DIED なら `lives` を 1 減らし、0 超なら新しい Level を作る（敵・?ブロック・開始位置が初期化され、coins/score は保つ）、0 なら GAME_OVER。CLEARED なら CLEAR |
-| 12 | render | `build_hud` の文字列と Session / Level の状態を描画。整数倍に拡大して表示 |
+| 12 | render | `build_hud` の文字列と Session / Level の状態を、ステージ領域（y < PLAY_H）にクリップして描く → 操作パネルを描く → 仮想ボタンを描く（タッチ端末のみ）。内部描画面は、縦横比を保ち小数倍で拡大して表示する |
 
 ## 6. 定数表（`src/game/constants.py` に集約）
 | 名前 | 値 | 単位 | 出典 |
 |---|---|---|---|
-| SCREEN_W | 256 | px | REQ-102 |
-| SCREEN_H | 240 | px | REQ-102 |
+| SCREEN_W | 592 | px | REQ-102 |
+| SCREEN_H | 304 | px | REQ-102 |
+| PLAY_H | 240 | px | REQ-054（ステージの高さ。STAGE_H_TILES * TILE_SIZE と一致） |
+| PANEL_H | 64 | px | REQ-052（SCREEN_H - PLAY_H と一致） |
+| TOUCH_BUTTON_SIZE | 48 | px | REQ-056 |
 | TILE_SIZE | 16 | px | 要件 §3 冒頭 |
 | FIXED_DT | 1/60 | s | REQ-101 |
 | MAX_STEPS_PER_FRAME | 5 | 回 | 初期値案（遅延時の暴走防止） |
@@ -286,6 +298,16 @@ async def main() -> None:
 | CAMERA_FOLLOW_X | 128 | px | REQ-039 |
 | STOMP_ZONE_RATIO | 0.5 | 比 | 要件 §5「踏みつけ条件」（敵の上半分） |
 
+### 6.1 仮想ボタンの配置（`src/render/touch_controls.py`）
+内部解像度の座標（左上原点）。縦位置は操作パネルの上端 240 px に余白 8 px を足した 248 px。
+
+| ボタン | x | y | 幅 | 高さ | 出典 |
+|---|---|---|---|---|---|
+| left | 16 | 248 | 48 | 48 | REQ-053, REQ-056（初期値案） |
+| right | 72 | 248 | 48 | 48 | 同上 |
+| run | 472 | 248 | 48 | 48 | 同上 |
+| jump | 528 | 248 | 48 | 48 | 同上 |
+
 ## 7. 設計判断
 | # | 選択 | 代替案 | 理由 |
 |---|---|---|---|
@@ -302,8 +324,12 @@ async def main() -> None:
 | 11 | キー入力とタッチ入力はどちらも HeldButtons に変換して OR で合わせる | 入力ごとに別の InputState を作る | REQ-045「同じ入力状態になる」を型で保証できる。Game 層はキーコードもタッチも知らない |
 | 12 | Web 版は pygbag で作り、`main()` を async にする | ネイティブ iOS アプリ。別の Web 化手段 | 要件で Web ブラウザ版に確定済み。pygbag は pygame-ce を動かせ、iPhone と Mac の両方に同じ成果物で届く |
 | 13 | ジャンプのコヨーテタイムとバッファは入れない | game-knowledge.md の定石どおり入れる | REQ-005「空中ではジャンプしない」に反し、要件にない機能になるため（YAGNI） |
+| 14 | 内部描画面の拡大は縦横比を保った小数倍にする。倍率は `min(window_w / SCREEN_W, window_h / SCREEN_H)` | 整数倍のみ。整数倍を基本にして足りないときだけ小数倍 | 整数倍では iPhone の横向き（高さ約 375 px）で倍率が 1 に固定され、画面が小さいままになる（人間の指摘）。REQ-102 が小数倍を許可した。倍率の計算は純関数にできテストしやすい |
+| 15 | 仮想ボタンとゲーム画面は別領域にする。ステージ領域（上 240 px）への描画はクリップし、下 64 px を操作パネルとして常に描く | ゲーム画面の上にボタンを半透明で重ねる（従来）。タッチ端末でだけ画面を伸ばす | 重ねるとマリオや敵が隠れる（人間の指摘）。端末で画面の構成が変わると、検証が端末ごとになる。常に同じ構成にすれば REQ-055 も満たせ、描画の分岐が減る |
 
 ## 8. 注意・リスク（人間への共有事項）
+- **小数倍の拡大**: ドットの幅が一部不均一に見えることがある（REQ-102、人間が選択）。
+- **カメラの追従位置**: 画面を 592 px にしても CAMERA_FOLLOW_X は 128 px のまま（REQ-039 は変えない）。プレイヤーは画面の左寄りに映り、右の見える範囲が広がる。
 - **Python のバージョン**: CLAUDE.md は Python 3.14 だが、pygbag が載せる Python は 3.14 とは限らない。問題が出た時点で調整する（人間の指示）。
 - **カメラ左端**: プレイヤーが画面の左端から完全に出ると死亡する（REQ-051、人間の指示で追加）。
 - **端末判定**: iPhone で最初のタッチ前に仮想ボタンを出すため、起動時に `navigator.maxTouchPoints` で判定する（DES-014）。タッチ対応のない macOS では出ない。

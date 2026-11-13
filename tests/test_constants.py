@@ -15,7 +15,19 @@ def test_fixed_dt_is_one_sixtieth_of_a_second() -> None:
 
 
 # TC-113
-def test_internal_resolution_is_256_by_240() -> None:
+def test_internal_resolution_is_592_by_304() -> None:
     size = (constants.SCREEN_W, constants.SCREEN_H)
 
-    assert size == (256, 240)
+    assert size == (592, 304)
+
+
+# TC-126
+def test_stage_area_is_240_px_and_control_panel_is_64_px() -> None:
+    heights = (constants.PLAY_H, constants.PANEL_H)
+
+    assert heights == (240, 64)
+
+
+# TC-128
+def test_touch_button_size_is_48_px() -> None:
+    assert constants.TOUCH_BUTTON_SIZE == 48

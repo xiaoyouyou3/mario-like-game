@@ -4,21 +4,29 @@
 
 | 項目 | 値 |
 |---|---|
-| 現在の工程 | 5. 完了確認（完了）。Git コミット済み。GitHub（private）へプッシュ済み: https://github.com/xiaoyouyou3/mario-like-game |
-| 状態 | 全30グループ Green・レビュー APPROVE。render/main/stage1/素材/pygbag ビルドは作成済み（2026-11-13 に scripts/build_web.sh で再作成。.venv 等の混入で 29.5MB だった APK が 19.8KB に）。追加テストも APPROVE。残り: 人間による手動確認 MC-001〜012 |
-| 次のアクション | 人間による手動確認 MC-001〜012 |
+| 現在の工程 | 変更要求（2026-11-13: 画面を 592x304 の横長にし、地面の操作パネルへ仮想ボタンを移す）。要件は承認済み。変更要求は 1〜4 の工程を完了（要件・設計は人間承認済み、各レビュー APPROVE）。完了済みの 1〜5 工程は <https://github.com/xiaoyouyou3/mario-like-game> に公開済み、Web 版は https://xiaoyouyou3.github.io/mario-like-game/ |
+| 状態 | 要件書を更新済み（REQ-041, 102 変更 / REQ-052〜056 追加）。要件は人間承認済み。基本設計を更新済み（DES-001/015/016/018、ADR 14・15、§6.1 追加）。基本設計は人間承認済み。テスト仕様を更新済み（TC-080/106/111/113/116 変更、TC-123〜128・MC-013/014 追加、trace_check spec OK）。テスト仕様レビュー 1回目 APPROVE（G26b・G27b に分割済み）。TDD: Red（19件失敗、有効）→ テストコード APPROVE → Green 完了（248件通過、ruff OK）。コードレビュー APPROVE。Web 版を再ビルドし gh-pages へ再デプロイ済み（2026-11-13）。残り: 人間による手動確認 MC-013/014（iPhone 実機で操作パネルとボタンの位置） |
+| 次のアクション | TDD: G19（TC-080/116 変更）→ G26/G26b → G27/G27b の順に Red → Green |
 
 ## 承認ログ
 | 成果物 | 人間の承認 | 日付 |
 |---|---|---|
 | 要件定義書 | 済（未決事項 #1〜6 に回答、REQ-050 追加、REQ-103/104 の検証環境を確定。REQ-051 は変更要求として人間が指示、要件レビュー3回目 APPROVE） | 2026-11-03 |
 | 基本設計書 | 済（人間の指示「REQ-051 反映後にレビューを通過したら進める」。基本設計レビュー3回目 APPROVE で確定） | 2026-11-03 |
+| 変更要求 画面サイズ・操作パネル（要件 REQ-041, 102 変更 / REQ-052〜056 追加） | 済（要件レビュー2回目 APPROVE 後、人間が「承認」） | 2026-11-13 |
+| 変更要求 画面サイズ・操作パネル（基本設計 DES-001/015/016/018、ADR 14・15、§6.1） | 済（基本設計レビュー1回目 APPROVE 後、人間が「承認」） | 2026-11-13 |
 
 ## レビュー履歴
 | 工程 | 往復 | 判定 | レビューファイル | 未解決 Must |
 |---|---|---|---|---|
 | 1. 要件定義 | 1 | REJECT | docs/reviews/requirements-review-1.md | REQ-R-001（2回目で解消） |
 | 1. 要件定義 | 2 | APPROVE | docs/reviews/requirements-review-2.md | なし（Should 2件: 優先度の偏り、REQ-049 の表外→表内に修正済み） |
+| 変更要求 画面サイズ・操作パネル（2026-11-13） | 要件1 | REJECT | docs/reviews/requirements-review-4.md | REQ-R-001（REQ-052/053 を分割して修正済み・再レビューで確認）。Should 2件も対応済み |
+| 変更要求 画面サイズ・操作パネル（2026-11-13） | 要件2 | APPROVE | docs/reviews/requirements-review-5.md | なし（Should 0件） |
+| 変更要求 画面サイズ・操作パネル 基本設計 | 1 | APPROVE | docs/reviews/basic-design-review-4.md | なし（Should 0件） |
+| 変更要求 画面サイズ・操作パネル テスト仕様 | 1 | APPROVE | docs/reviews/test-spec-review-3.md | なし（Should SPEC-R-014: G26/G27 を G26b/G27b に分割して対応済み） |
+| 変更要求 画面サイズ・操作パネル テストコード | 1 | APPROVE | docs/reviews/test-code-review-batch13.md | なし（Should TEST-R-001: 対応不要） |
+| 変更要求 画面サイズ・操作パネル 実装 | 1 | APPROVE | docs/reviews/code-review-batch12.md | なし（Should 0件） |
 | 2. 基本設計 | 1 | REJECT | docs/reviews/basic-design-review-1.md | DES-R-001（2回目で解消） |
 | 2. 基本設計 | 2 | APPROVE | docs/reviews/basic-design-review-2.md | なし（Should 0件） |
 | 変更要求 REQ-051 | 要件3 / 設計3 | APPROVE / APPROVE | docs/reviews/requirements-review-3.md, basic-design-review-3.md | なし（要件 Should 2件: 優先度の偏り、REQ-051 の並び順） |

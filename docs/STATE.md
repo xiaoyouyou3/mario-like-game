@@ -4,7 +4,7 @@
 
 | 項目 | 値 |
 |---|---|
-| 現在の工程 | 5. 完了確認（完了）。Git コミット済み。GitHub（private）へプッシュ済み: https://github.com/kobataka-team/mario-like-game |
+| 現在の工程 | 5. 完了確認（完了）。Git コミット済み。GitHub（private）へプッシュ済み: https://github.com/xiaoyouyou3/mario-like-game |
 | 状態 | 全30グループ Green・レビュー APPROVE。render/main/stage1/素材/pygbag ビルドは作成済み（2026-11-13 に scripts/build_web.sh で再作成。.venv 等の混入で 29.5MB だった APK が 19.8KB に）。追加テストも APPROVE。残り: 人間による手動確認 MC-001〜012 |
 | 次のアクション | 人間による手動確認 MC-001〜012 |
 
